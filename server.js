@@ -1,56 +1,50 @@
-import express from 'express'
-import cors from "cors"
-import 'dotenv/config'
-import connectDB from './config/mongodb.js'
-import connectCloudinary from './config/cloudinary.js'
-import adminRouter from './routes/adminRoute.js'
-import doctorRouter from './routes/doctorRoute.js'
-import userRouter from './routes/userRoute.js'
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import connectDB from "../config/mongodb.js";
+import connectCloudinary from "../config/cloudinary.js";
+import adminRouter from "../routes/adminRoute.js";
+import doctorRouter from "../routes/doctorRoute.js";
+import userRouter from "../routes/userRoute.js";
 
+const app = express();
 
+/* ✅ DB & Cloudinary */
+connectDB();
+connectCloudinary();
 
-//app config
-const app=express()
-const port = process.env.PORT || 4000
-connectDB()
-connectCloudinary()
-//middlewares
-app.use(express.json())
-// app.use(cors())//it allow frontend to connect with backend
+/* ✅ CORS MUST COME FIRST */
 app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://presrcipto-frontend.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
+
 app.options("*", cors());
 
- app.use((req, res, next) => {
+/* ✅ Body parser */
+app.use(express.json());
+
+/* ✅ Disable caching (fix 304 + CORS issues) */
+app.use((req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
   next();
 });
 
+/* ✅ Routes */
+app.use("/api/admin", adminRouter);
+app.use("/api/doctor", doctorRouter);
+app.use("/api/user", userRouter);
 
-//api endpoints
-
-//checking cloudinary
-console.log("ENV CHECK:", {
-  CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
-  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
-  CLOUDINARY_SECRET_KEY: process.env.CLOUDINARY_SECRET_KEY,
+/* ✅ Test route */
+app.get("/", (req, res) => {
+  res.send("Backend working on Vercel 🚀");
 });
 
-
-app.use('/api/admin',adminRouter)
-app.use('/api/doctor',doctorRouter)
-app.use('/api/user',userRouter)
-
-//localhost:4000/api/admin
-
-app.get('/',(req,res)=>{
-  res.send('API WORKING jaanv')
-})
-
-app.listen(port,()=>console.log("server started",port))
+/* ❌ REMOVE app.listen() */
+/* ✅ EXPORT APP INSTEAD */
+export default app;
