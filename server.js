@@ -16,7 +16,15 @@ connectDB()
 connectCloudinary()
 //middlewares
 app.use(express.json())
-app.use(cors())//it allow frontend to connect with backend
+// app.use(cors())//it allow frontend to connect with backend
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://presrcipto-frontend.vercel.app/"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
+}));
 
 //api endpoints
 
