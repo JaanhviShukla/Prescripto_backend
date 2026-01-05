@@ -17,14 +17,25 @@ connectCloudinary()
 //middlewares
 app.use(express.json())
 // app.use(cors())//it allow frontend to connect with backend
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://presrcipto-frontend.vercel.app"
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://presrcipto-frontend.vercel.app"
-  ],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
+
+// IMPORTANT for preflight
 app.options("*", cors());
 
  app.use((req, res, next) => {
